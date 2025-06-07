@@ -70,3 +70,66 @@ if uploaded_file is not None:
         st.success(" The welding process is CORRECT (No Defect)")
     else:
         st.error(f"The welding process is DEFECTIVE (Class ID: {prediction})")
+import streamlit as st
+import time
+
+features, labels = [], []
+
+image_files = [f for f in os.listdir(image_path) if f.endswith('.jpg')]
+
+progress_bar = st.progress(0)
+status_text = st.empty()
+
+for i, img_file in enumerate(image_files):
+    status_text.text(f"Processing image {i + 1} of {len(image_files)}: {img_file}")
+
+    img_path = os.path.join(image_path, img_file)
+    label_file = os.path.join(label_path, img_file.replace('.jpg', '.txt'))
+    if not os.path.exists(label_file):
+        continue
+    image = Image.open(img_path).convert('RGB')
+    img_tensor = transform(image).unsqueeze(0)
+    with torch.no_grad():
+        feature = resnet(img_tensor).squeeze().numpy()
+    with open(label_file, 'r') as f:
+        line = f.readline()
+        if not line.strip():
+            continue
+        class_id = int(line.strip().split()[0])
+        features.append(feature)
+        labels.append(class_id)
+
+    progress_bar.progress((i + 1) / len(image_files))
+
+status_text.text("Feature extraction completed!")
+progress_bar.empty()
+features, labels = [], []
+
+image_files = [f for f in os.listdir(image_path) if f.endswith('.jpg')]
+
+progress_bar = st.progress(0)
+status_text = st.empty()
+
+for i, img_file in enumerate(image_files):
+    status_text.text(f"Processing image {i + 1} of {len(image_files)}: {img_file}")
+
+    img_path = os.path.join(image_path, img_file)
+    label_file = os.path.join(label_path, img_file.replace('.jpg', '.txt'))
+    if not os.path.exists(label_file):
+        continue
+    image = Image.open(img_path).convert('RGB')
+    img_tensor = transform(image).unsqueeze(0)
+    with torch.no_grad():
+        feature = resnet(img_tensor).squeeze().numpy()
+    with open(label_file, 'r') as f:
+        line = f.readline()
+        if not line.strip():
+            continue
+        class_id = int(line.strip().split()[0])
+        features.append(feature)
+        labels.append(class_id)
+
+    progress_bar.progress((i + 1) / len(image_files))
+
+status_text.text("Feature extraction completed!")
+progress_bar.empty()
